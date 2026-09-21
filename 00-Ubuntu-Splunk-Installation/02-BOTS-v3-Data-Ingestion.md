@@ -2,111 +2,152 @@
 
 ## 1. Objective
 
-The objective of this phase is to ingest the **Splunk BOTS v3 dataset** into the Ubuntu-based Splunk environment.
+The objective of this phase is to install and load the **Splunk Boss of the SOC (BOTS) v3 dataset** into the Ubuntu-based Splunk environment.
 
-BOTS v3 provides security-related data that can be used to practice realistic SOC investigation, threat hunting, incident analysis, and MITRE ATT&CK mapping.
+BOTS v3 provides realistic security data for practicing **SOC investigation, threat hunting, incident analysis, and MITRE ATT&CK mapping**.
 
-## 2. Dataset
+---
 
-The **Splunk Boss of the SOC (BOTS) v3** dataset is used as the primary investigation dataset for this project.
+## 2. Install BOTS v3
 
-The dataset has already been downloaded and is available for ingestion.
+### 2.1 Download the Dataset
 
-## 3. Prepare the Dataset
-
-First, identify the location of the downloaded BOTS v3 files.
-
-Example:
+On the Ubuntu Splunk server, navigate to `/tmp`:
 
 ```bash
-cd ~/Downloads
-ls -lh
+cd /tmp
 ```
 
-If the dataset is compressed, extract it using the appropriate command.
-
-For a `.tar.gz` archive:
+Download the official BOTS v3 dataset:
 
 ```bash
-tar -xvzf <bots-v3-file>.tar.gz
+wget https://botsdataset.s3.amazonaws.com/botsv3/botsv3_data_set.tgz
 ```
 
-For a `.zip` archive:
+Check the downloaded file:
 
 ```bash
-unzip <bots-v3-file>.zip
+ls -lh botsv3_data_set.tgz
 ```
 
-Verify the extracted files:
+The dataset should be approximately **320 MB**.
+
+---
+
+### 2.2 Verify the Dataset Using MD5
+
+Before extracting the dataset, verify its integrity using the official MD5 checksum.
+
+Official MD5:
+
+```text
+d7ccca99a01cff070dff3c139cdc10eb
+```
+
+Run:
 
 ```bash
-ls -lh
+md5sum botsv3_data_set.tgz
 ```
 
-## 4. Create a Dedicated Splunk Index
-
-Open Splunk Web:
+Expected output:
 
 ```text
-Settings → Indexes → New Index
+d7ccca99a01cff070dff3c139cdc10eb  botsv3_data_set.tgz
 ```
 
-Create an index dedicated to the BOTS v3 dataset.
+If the calculated MD5 matches the official checksum, the downloaded dataset is valid and can be used for the installation.
 
-Example:
+---
+
+### 2.3 Check the Splunk Apps Directory
+
+Before extracting the dataset, verify the Splunk application directory:
+
+```bash
+ls /opt/splunk/etc/apps
+```
+
+This directory contains the applications and supporting data used by the Splunk installation.
+
+---
+
+### 2.4 Extract BOTS v3 into Splunk
+
+Extract the downloaded BOTS v3 archive directly into the Splunk applications directory:
+
+```bash
+sudo tar -xvzf /tmp/botsv3_data_set.tgz -C /opt/splunk/etc/apps/
+```
+
+The extraction process creates the required BOTS v3 application/data directories under:
 
 ```text
-Index Name: botsv3
+/opt/splunk/etc/apps/
 ```
 
-Save the index.
+---
 
-## 5. Add BOTS v3 Data
+### 2.5 Verify the BOTS Installation
 
-Navigate to:
+Check whether the BOTS-related directory was created:
 
-```text
-Settings → Add Data
+```bash
+ls -lah /opt/splunk/etc/apps/ | grep bots
 ```
 
-Select the appropriate data source according to the format of the downloaded BOTS v3 dataset.
+If the BOTS-related directory is displayed, the dataset has been successfully extracted into the Splunk environment.
 
-Configure the destination index:
+---
 
-```text
-Index: botsv3
+## 3. Restart Splunk
+
+After installing the BOTS v3 application/data, restart Splunk to load the new configuration:
+
+```bash
+sudo /opt/splunk/bin/splunk restart
 ```
 
-Complete the data input configuration.
+Verify that Splunk is running:
 
-## 6. Verify Data Ingestion
+```bash
+sudo /opt/splunk/bin/splunk status
+```
 
-Open:
+---
+
+## 4. Verify BOTS v3 in Splunk
+
+Open Splunk Web and navigate to:
 
 ```text
 Search & Reporting
 ```
 
-Run:
+Run a basic search:
 
 ```spl
 index=botsv3
 ```
 
-If events are returned, the BOTS v3 data has been successfully ingested.
+If events are returned, the BOTS v3 dataset is available for investigation.
 
-## 7. Check Event Volume
+---
 
-Run:
+## 5. Check Event Volume
+
+To determine the total number of events available in the BOTS v3 index:
 
 ```spl
 index=botsv3
 | stats count
 ```
 
-This provides the total number of events currently available in the index.
+This provides the total event count currently available in the index.
 
-## 8. Identify Sourcetypes
+---
+
+## 6. Identify Sourcetypes
 
 Run:
 
@@ -116,9 +157,11 @@ index=botsv3
 | sort - count
 ```
 
-This helps identify the different types of security data available in the dataset.
+This identifies the different types of security data contained in the dataset.
 
-## 9. Identify Hosts
+---
+
+## 7. Identify Hosts
 
 Run:
 
@@ -128,9 +171,11 @@ index=botsv3
 | sort - count
 ```
 
-This provides an overview of the systems represented in the dataset.
+This provides an overview of the hosts represented in the BOTS v3 dataset.
 
-## 10. Verify Time Range
+---
+
+## 8. Verify the Event Time Range
 
 Run:
 
@@ -139,9 +184,11 @@ index=botsv3
 | stats earliest(_time) as earliest latest(_time) as latest
 ```
 
-This verifies the time range of the ingested events.
+This verifies the earliest and latest timestamps available in the dataset.
 
-## 11. Basic Investigation Search
+---
+
+## 9. Review Sample Events
 
 Run:
 
@@ -150,13 +197,15 @@ index=botsv3
 | head 20
 ```
 
-Review the returned events and confirm that the dataset is searchable.
+Review the returned events to confirm that the BOTS v3 data is searchable and contains security-related activity.
 
-## 12. Data Ingestion Completed
+---
 
-The BOTS v3 dataset is now available in Splunk and can be used for SOC investigations.
+## 10. BOTS v3 Installation Completed
 
-The next phase of the project will investigate individual security incidents:
+The BOTS v3 dataset has been downloaded, integrity-verified, extracted into the Splunk application directory, and made available for investigation.
+
+The BOTS v3 dataset will now be used as the foundation for the SOC investigation phases:
 
 ```text
 01 - Brute Force
@@ -171,4 +220,4 @@ The next phase of the project will investigate individual security incidents:
 10 - Full Attack
 ```
 
-Each incident will have its own investigation, SPL queries, evidence, screenshots, and findings.
+Each investigation will include relevant **SPL queries, security events, evidence, screenshots, analysis, and findings**.
