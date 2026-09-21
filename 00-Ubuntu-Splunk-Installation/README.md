@@ -57,3 +57,4 @@ See: [`02-BOTS-v3-Data-Ingestion.md`](./02-BOTS-v3-Data-Ingestion.md)
 ## Next Step
 
 After completing the Splunk installation and BOTS v3 data ingestion, the environment will be ready for the **10 SOC incident investigations**.
+
